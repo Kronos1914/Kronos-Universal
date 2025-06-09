@@ -67,13 +67,23 @@
   <div class="board" id="board"></div>
   <div class="modal" id="modal"><p id="modalText"></p><button onclick="resetGame()" data-key="ok">OK</button></div>
   <script>
-    const texts = { es:{ mode:'Ajustes', difficulty:'Dificultad', theme:'Tema 💡', language:'Idioma', reset:'Reiniciar', ok:'OK', Xwins:'¡Ganó X!', Owins:'¡Ganó O!', draw:'¡Empate!', turn:'Turno', draws:'Empates'}, en:{ mode:'Settings', difficulty:'Difficulty', theme:'Theme 💡', language:'Language', reset:'Reset', ok:'OK', Xwins:'X wins', Owins:'O wins', draw:'Draw!', turn:'Turn', draws: 'Draws'} };
+    const texts = { es:{ mode:'Ajustes', difficulty:'Dificultad', theme:'Tema 💡', language:'Idioma', reset:'Reiniciar', ok:'OK', Xwins:'¡Ganó X!', Owins:'¡Ganó O!', draw:'¡Empate!', turn:'Turno', draws:'Empates', easy:'Fácil', medium:'Normal', hard:'Difícil'}, en:{ mode:'Settings', difficulty:'Difficulty', theme:'Theme 💡', language:'Language', reset:'Reset', ok:'OK', Xwins:'X wins', Owins:'O wins', draw:'Draw!', turn:'Turn', draws: 'Draws', easy:'Easy', medium:'Normal', hard:'Hard' } };
     let lang='es',theme='light',mode='pvp',difficulty='easy';
     const boardEl=document.getElementById('board'),modal=document.getElementById('modal'),modalText=document.getElementById('modalText');
     let board=[...Array(9)].map(_=>'');let current='X',scores={X:0,O:0,D:0},active=true;
     const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
     function init(){createBoard();renderTexts();}
-    function renderTexts(){document.querySelectorAll('[data-key]').forEach(el=>el.textContent=texts[lang][el.getAttribute('data-key')]);}
+    function renderTexts() {
+  document.querySelectorAll('[data-key]').forEach(el => {
+    el.textContent = texts[lang][el.getAttribute('data-key')];
+  });
+
+  // Traducir opciones del selector de dificultad
+  const diffSelect = document.getElementById('diffSelect');
+  diffSelect.options[0].textContent = texts[lang].easy;
+  diffSelect.options[1].textContent = texts[lang].medium;
+  diffSelect.options[2].textContent = texts[lang].hard;
+}
     function toggleMenu(){document.getElementById('menu').style.display=(menu.style.display==='block'?'none':'block');}
     function toggleTheme(){theme=theme==='light'?'dark':'light';document.body.setAttribute('data-theme',theme);}
     function toggleLanguage(){
@@ -153,9 +163,16 @@ document.addEventListener('click', function(e) {
     menu.style.display = 'none';
   }
 });
-init();
 updateScores();
 updateTurn();
 </script>
+<footer style="text-align:center; font-size:0.85rem; opacity:0.6; margin:1rem 0;">
+  Hecho por <a href="https://kronos1914.github.io/Kronos-Universal/index.html" target="_blank" style="color:inherit; text-decoration:underline;">Kronos - Nicolás Trinidad</a>
+</footer>
+<!--
+  Kronos - Ta Te Tí
+  Desarrollado por Kronos - Nicolás Trinidad
+  https://kronos1914.github.io/Kronos-Universal/
+-->
 </body>
 </html>
