@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Juego de Memoria</title>
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --card-bg: #ffffff;
+      --text: #333333;
+      --accent: #4fc3f7;
+    }
+
+    body.dark-mode {
+      --bg: #121212;
+      --card-bg: #1e1e1e;
+      --text: #f5f5f5;
+      --accent: #64b5f6;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    h1 {
+      margin-top: 20px;
+    }
+
+    #menu, #game, #pauseMenu {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .btn {
+      background-color: var(--accent);
+      border: none;
+      color: var(--text);
+      padding: 10px 20px;
+      margin: 10px;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #0288d1;
+    }
+
+    #board {
+      display: grid;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .card {
+      width: 70px;
+      height: 90px;
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(1rem, 5vw, 2.5rem);
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      color: transparent;
+      transition: transform 0.3s, background 0.3s;
+    }
+
+    .card.revealed {
+      color: inherit;
+      transform: scale(1.1);
+    }
+
+    #info {
+      margin-top: 10px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        width: 60px;
+        height: 80px;
+        font-size: 1.2rem;
+      }
+    }
+
+    #pauseMenu {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.85);
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      color: var(--text);
+    }
+
+    body.dark-mode #pauseMenu {
+      background: rgba(30, 30, 30, 0.85);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧠 Juego de Memoria 🧠</h1>
+
+  <div id="menu">
+    <p>Selecciona la dificultad:</p>
+    <button class="btn" onclick="startGame(4)">Fácil (4 pares)</button>
+    <button class="btn" onclick="startGame(8)">Medio (8 pares)</button>
+    <button class="btn" onclick="startGame(12)">Difícil (12 pares)</button>
+    <button class="btn" onclick="toggleDarkMode()">🌙 Modo Oscuro / ☀️ Modo Claro</button>
+  </div>
+
+  <div id="game">
+    <div id="info">
+      <span>⏱ Tiempo: <span id="time">0</span>s</span>
+      <span>🎯 Intentos: <span id="attempts">0</span></span>
+      <button class="btn" onclick="togglePause()">⏸️ Pausa</button>
+    </div>
+    <div id="board"></div>
+  </div>
+
+  <div id="pauseMenu">
+    <h2>Juego en pausa</h2>
+    <button class="btn" onclick="togglePause()">▶️ Reanudar</button>
+    <button class="btn" onclick="startMenu()">🏠 Menú principal</button>
+  </div>
+
+  <script>
+    const menu = document.getElementById('menu');
+    const game = document.getElementById('game');
+    const board = document.getElementById('board');
+    const timeDisplay = document.getElementById('time');
+    const attemptsDisplay = document.getElementById('attempts');
+    const pauseMenu = document.getElementById('pauseMenu');
+
+    let cards = [], revealed = [], pairs = 0;
+    let attempts = 0, time = 0, timerInterval;
+    let isPaused = false;
+
+    const colors = ['#f44336','#e91e63','#9c27b0','#3f51b5','#2196f3','#009688','#4caf50','#ff9800','#795548','#607d8b','#ff5722','#8bc34a'];
+
+    function startMenu() {
+      pauseMenu.style.display = 'none';
+      game.style.display = 'none';
+      menu.style.display = 'flex';
+      clearInterval(timerInterval);
+    }
+
+    function startGame(pairCount) {
+      menu.style.display = 'none';
+      game.style.display = 'flex';
+      pauseMenu.style.display = 'none';
+      board.innerHTML = '';
+      cards = [];
+      revealed = [];
+      attempts = 0;
+      time = 0;
+      attemptsDisplay.textContent = '0';
+      timeDisplay.textContent = '0';
+      isPaused = false;
+
+      let deck = [];
+      for (let i = 1; i <= pairCount; i++) {
+        let color = colors[(i - 1) % colors.length];
+        deck.push({ id: i * 2 - 2, value: i, color });
+        deck.push({ id: i * 2 - 1, value: i, color });
+      }
+
+      deck = deck.sort(() => Math.random() - 0.5);
+      pairs = pairCount;
+      const columns = Math.ceil(Math.sqrt(pairCount * 2));
+      board.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+
+      for (let card of deck) {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.dataset.value = card.value;
+        div.dataset.color = card.color;
+        div.onclick = () => revealCard(div);
+        board.appendChild(div);
+        cards.push(div);
+      }
+
+      timerInterval = setInterval(() => {
+        if (!isPaused) {
+          time++;
+          timeDisplay.textContent = time;
+        }
+      }, 1000);
+    }
+
+    function revealCard(card) {
+      if (card.classList.contains('revealed') || revealed.length === 2 || isPaused) return;
+
+      card.classList.add('revealed');
+      card.style.color = card.dataset.color;
+      card.textContent = card.dataset.value;
+      revealed.push(card);
+
+      if (revealed.length === 2) {
+        attempts++;
+        attemptsDisplay.textContent = attempts;
+        const [a, b] = revealed;
+        if (a.dataset.value === b.dataset.value && a.dataset.color === b.dataset.color) {
+          revealed = [];
+          pairs--;
+          if (pairs === 0) {
+            clearInterval(timerInterval);
+            setTimeout(() => alert(`¡Ganaste! Intentos: ${attempts}, Tiempo: ${time}s`), 300);
+          }
+        } else {
+          setTimeout(() => {
+            a.classList.remove('revealed');
+            b.classList.remove('revealed');
+            a.textContent = '';
+            b.textContent = '';
+            a.style.color = 'transparent';
+            b.style.color = 'transparent';
+            revealed = [];
+          }, 800);
+        }
+      }
+    }
+
+    function togglePause() {
+      isPaused = !isPaused;
+      pauseMenu.style.display = isPaused ? 'flex' : 'none';
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    startMenu();
+  </script>
+
+  <footer style="text-align:center; font-size:0.85rem; opacity:0.6; margin:1rem 0;">
+    Hecho por <a href="https://kronos1914.github.io/Kronos-Universal/index.html" target="_blank" style="color:inherit; text-decoration:underline;">Kronos - Nicolás Trinidad</a>
+  </footer>
+
+</body>
+</html>
