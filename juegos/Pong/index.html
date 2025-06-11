@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>PONG - Kronos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      color: lime;
+      font-family: 'Courier New', monospace;
+      overflow: hidden;
+      touch-action: none;
+      height: 100%;
+    }
+    canvas {
+      display: block;
+      margin: auto;
+      background: black;
+      border: 5px solid lime;
+      width: 100vw;
+      height: 100vh;
+    }
+    #menu, #pauseBtn {
+      position: absolute;
+      background: black;
+      color: white;
+      font-family: 'Courier New', monospace;
+      border: 2px solid lime;
+      padding: 10px;
+      z-index: 10;
+    }
+    #menu {
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+    button, select {
+      background: black;
+      color: lime;
+      border: 2px solid lime;
+      padding: 10px;
+      margin: 10px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    button:hover, select:hover {
+      background: lime;
+      color: black;
+    }
+    #pauseBtn {
+  top: 10px;
+  right: 10px;
+}
+    #pauseMenu {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: black;
+  border: 2px solid lime;
+  padding: 20px;
+  text-align: center;
+  display: none;
+  z-index: 10;
+}
+
+.score-text {
+  font-size: min(5vw, 24px);
+}
+
+@media (max-width: 600px) {
+  #menu, #pauseMenu {
+    width: 90%;
+    font-size: 4vw;
+  }
+}
+
+  </style>
+</head>
+<body>
+
+<div id="menu">
+  <h1>PONG - Kronos</h1>
+  <p>Puntaje más alto: <span id="highscore">0</span></p>
+  <label>Dificultad:</label>
+  <select id="difficulty">
+    <option value="easy">Fácil</option>
+    <option value="medium">Normal</option>
+    <option value="hard">Difícil</option>
+  </select><br/>
+  <button onclick="startGame()">Iniciar Juego</button>
+  <button onclick="fullscreen()">Pantalla completa</button>
+<footer style="text-align:center; font-size:0.85rem; opacity:0.6; margin:1rem 0;">
+  Hecho por <a href="https://kronos1914.github.io/Kronos-Universal/index.html" target="_blank" style="color:inherit; text-decoration:underline;">Kronos - Nicolás Trinidad</a>
+</footer>
+</div>
+
+<div id="pauseMenu">
+  <h2>PAUSA</h2>
+  <button onclick="resumeGame()">Continuar</button>
+  <button onclick="returnToMenu()">Menú Principal</button>
+</div>
+
+<button id="pauseBtn" onclick="togglePause()" style="display: none;">Pausa</button>
+
+<canvas id="gameCanvas" width="800" height="500"></canvas>
+
+<!-- Sonidos libres de derechos desde Pixabay -->
+<audio id="bounceSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_89cc46e5a2.mp3?filename=retro-arcade-ping-112847.mp3"></audio>
+<audio id="scoreSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_b27e210c16.mp3?filename=arcade-bleep-112845.mp3"></audio>
+
+<script>
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const menu = document.getElementById('menu');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const bounceSound = document.getElementById('bounceSound');
+  const scoreSound = document.getElementById('scoreSound');
+  const highscoreSpan = document.getElementById('highscore');
+
+  let controlType = 'keyboard';
+  let difficulty = 'easy';
+  let animationId;
+  let isPaused = false;
+
+  const paddleWidth = 10, paddleHeight = 100;
+  let playerY = canvas.height / 2 - paddleHeight / 2;
+  let aiY = playerY;
+  const ballSize = 10;
+  let ballX = canvas.width / 2, ballY = canvas.height / 2;
+  let ballSpeedX = 5, ballSpeedY = 3;
+  let impactPoint = ballY - (playerY + paddleHeight / 2);
+let angle = impactPoint * 0.25; // Modula el ángulo
+let ballDy = angle;
+  let playerScore = 0, aiScore = 0;
+  let highScore = localStorage.getItem('pongHighScore') || 0;
+  highscoreSpan.textContent = highScore;
+
+  function detectControl() {
+    if ('ontouchstart' in window) return 'mouse';
+    else if (window.matchMedia("(pointer: coarse)").matches) return 'mouse';
+    else return 'keyboard';
+  }
+
+  function startGame() {
+  if (animationId) cancelAnimationFrame(animationId);
+  difficulty = document.getElementById('difficulty').value;
+  controlType = detectControl();
+  menu.style.display = 'none';
+  pauseBtn.style.display = 'block';
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  canvas.addEventListener('mousemove', controlMouse);
+  canvas.addEventListener('touchmove', controlTouch, {passive: false});
+  document.addEventListener('keydown', handleKey);
+  resetGame();
+  mostrarCuentaRegresiva(() => loop());
+}
+
+function addEventListeners() {
+  canvas.addEventListener('mousemove', controlMouse);
+  canvas.addEventListener('touchmove', controlTouch, { passive: false });
+  document.addEventListener('keydown', handleKey);
+}
+
+function removeEventListeners() {
+  canvas.removeEventListener('mousemove', controlMouse);
+  canvas.removeEventListener('touchmove', controlTouch);
+  document.removeEventListener('keydown', handleKey);
+}
+
+// Al iniciar juego:
+removeEventListeners();
+addEventListeners();
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function resetGame() {
+    playerY = aiY = canvas.height / 2 - paddleHeight / 2;
+    ballX = canvas.width / 2;
+    ballY = canvas.height / 2;
+    ballSpeedX = difficulty === 'easy' ? 4 : difficulty === 'medium' ? 6 : 8;
+    ballSpeedY = 3;
+    playerScore = 0;
+    aiScore = 0;
+  }
+
+  function loop() {
+    if (!isPaused) update();
+    draw();
+    animationId = requestAnimationFrame(loop);
+  }
+
+  function update() {
+    ballX += ballSpeedX;
+    ballY += ballSpeedY;
+
+    if (ballY < 0 || ballY > canvas.height - ballSize) {
+      ballSpeedY *= -1;
+      bounceSound.play();
+    }
+
+    if (ballX <= 20 &&
+    ballY + ballSize >= playerY &&
+    ballY <= playerY + paddleHeight) {
+  const impact = (ballY - (playerY + paddleHeight / 2)) / (paddleHeight / 2);
+  ballSpeedY = impact * 5;
+  ballSpeedX *= -1;
+  bounceSound.play();
+}
+
+    if (ballX >= canvas.width - 20 - ballSize &&
+        ballY + ballSize >= aiY &&
+        ballY <= aiY + paddleHeight) {
+      ballSpeedX *= -1;
+      bounceSound.play();
+    }
+
+    // AI movement con error
+    let aiCenter = aiY + paddleHeight / 2;
+    let targetY = ballY + (Math.random() * 30 - 15);
+    let speed = difficulty === 'easy' ? 2 : difficulty === 'medium' ? 4 : 6;
+    if (aiCenter < targetY) aiY += speed;
+    else aiY -= speed;
+    aiY = Math.max(0, Math.min(canvas.height - paddleHeight, aiY));
+
+    // Score
+    if (ballX < 0) {
+      aiScore++;
+      scoreSound.play();
+      resetBall();
+    }
+    if (ballX > canvas.width) {
+      playerScore++;
+      scoreSound.play();
+      if (playerScore > highScore) {
+        localStorage.setItem('pongHighScore', playerScore);
+        highscoreSpan.textContent = playerScore;
+      }
+      resetBall();
+    }
+  }
+  
+  function calcularReboteAngular(ballY, paddleY, paddleHeight, ballDx, ballDy) {
+  let impacto = ballY - (paddleY + paddleHeight / 2);
+  let impactoNormalizado = impacto / (paddleHeight / 2);
+
+  const anguloMaximo = Math.PI / 4; // 45 grados en radianes
+
+  let anguloRebote = impactoNormalizado * anguloMaximo;
+
+  let velocidad = Math.sqrt(ballDx * ballDx + ballDy * ballDy);
+
+  ballDx = -Math.sign(ballDx) * velocidad * Math.cos(anguloRebote);
+  ballDy = velocidad * Math.sin(anguloRebote);
+
+  return { ballDx, ballDy };
+}
+
+  function resetBall() {
+  ballX = canvas.width / 2;
+  ballY = canvas.height / 2;
+  ballSpeedX = (Math.random() > 0.5 ? 1 : -1) * (difficulty === 'easy' ? 4 : difficulty === 'medium' ? 6 : 8);
+  ballSpeedY = (Math.random() * 4) - 2; // Valor aleatorio entre -2 y 2
+}
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'white';
+    for (let i = 0; i < canvas.height; i += 20) {
+      ctx.fillRect(canvas.width / 2 - 1, i, 2, 10);
+    }
+    ctx.fillRect(10, playerY, paddleWidth, paddleHeight);
+    ctx.fillRect(canvas.width - 20, aiY, paddleWidth, paddleHeight);
+    ctx.fillRect(ballX, ballY, ballSize, ballSize);
+    const fontSize = Math.min(canvas.width * 0.05, 24);
+ctx.font = `${fontSize}px Courier New`;
+ctx.fillText(`Jugador: ${playerScore}`, 50, fontSize + 6);
+ctx.fillText(`  CPU: ${aiScore}`, canvas.width - 180, fontSize + 6);
+    if (isPaused) {
+      ctx.font = '48px Courier New';
+      ctx.fillText('PAUSA', canvas.width / 2 - 80, canvas.height / 2);
+    }
+  }
+
+  function controlMouse(e) {
+    if (controlType !== 'mouse') return;
+    const rect = canvas.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    playerY = Math.max(0, Math.min(canvas.height - paddleHeight, y - paddleHeight / 2));
+  }
+
+  function controlTouch(e) {
+    e.preventDefault();
+    if (controlType !== 'mouse') return;
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const y = touch.clientY - rect.top;
+    playerY = Math.max(0, Math.min(canvas.height - paddleHeight, y - paddleHeight / 2));
+  }
+
+  function handleKey(e) {
+  if (e.key === 'p') togglePause();
+  if (controlType === 'keyboard') {
+    if (e.key === 'ArrowUp') playerY -= 8;
+    if (e.key === 'ArrowDown') playerY += 8;
+    playerY = Math.max(0, Math.min(canvas.height - paddleHeight, playerY));
+  }
+}
+
+function togglePause() {
+  isPaused = !isPaused;
+  document.getElementById('pauseMenu').style.display = isPaused ? 'block' : 'none';
+}
+
+function mostrarCuentaRegresiva(callback) {
+  const countdown = document.getElementById("countdown");
+  const countdownNumber = document.getElementById("countdown-number");
+  let count = 3;
+  countdown.style.display = "block";
+  countdownNumber.textContent = count;
+
+  const interval = setInterval(() => {
+    count--;
+    if (count === 0) {
+      clearInterval(interval);
+      countdown.style.display = "none";
+      callback(); // Llama a la función para iniciar o reanudar el juego
+    } else {
+      countdownNumber.textContent = count;
+    }
+  }, 1000);
+}
+
+function showMenu() {
+  document.getElementById('menu').style.display = 'block';
+  document.getElementById('pauseMenu').style.display = 'none';
+  document.getElementById('game').style.display = 'none';
+  isPaused = false; // ← Esta línea es fundamental
+}
+
+function resumeGame() {
+  isPaused = false;
+  document.getElementById('pauseMenu').style.display = 'none';
+}
+
+function returnToMenu() {
+  cancelAnimationFrame(animationId);
+  document.getElementById('pauseMenu').style.display = 'none';
+  pauseBtn.style.display = 'none';
+  menu.style.display = 'block';
+}
+
+function fullscreen() {
+  if (canvas.requestFullscreen) {
+    canvas.requestFullscreen();
+  } else if (canvas.webkitRequestFullscreen) {
+    canvas.webkitRequestFullscreen();
+  } else if (canvas.msRequestFullscreen) {
+    canvas.msRequestFullscreen();
+  }
+}
+</script>
+<!--
+  Kronos - Ta Te Ti
+  Desarrollado por Kronos - Nicolás Trinidad
+  https://kronos1914.github.io/Kronos-Universal/
+-->
+<div id="countdown" style="display:none; font-size:3rem; text-align:center; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); z-index:1000; background:rgba(0,0,0,0.75); color:white; padding:1rem 2rem; border-radius:1rem;">
+  <span id="countdown-number">3</span>
+</div>
+</body>
+</html>
