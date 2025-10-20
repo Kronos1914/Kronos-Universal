@@ -1,39 +1,161 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Diseños - Kronos</title>
-  <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f8f8f8; margin: 0; color: #333; }
-    header, footer { text-align: center; padding: 1rem; background: #222; color: white; }
-    main { max-width: 900px; margin: auto; padding: 2rem; }
-    h1 { font-size: 2rem; }
-    .galeria { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-    .galeria img { width: 100%; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    a.volver { display: inline-block; margin-top: 1.5rem; text-decoration: none; color: white; background: #444; padding: 0.5rem 1rem; border-radius: 5px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diseños - Kronos</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+html {scroll-behavior: smooth;}
+body {
+  font-family: 'Poppins', sans-serif;
+  margin:0;
+  background: linear-gradient(120deg, #f5f7fa 0%, #c3cfe2 100%);
+  color:#232526;
+  line-height:1.6;
+}
+
+/* ANIMATED HEADER */
+header {
+  background: linear-gradient(-45deg, #232526, #0abcf3, #414345, #232526);
+  background-size:400% 400%;
+  animation: gradientBG 15s ease infinite;
+  color:#fff;
+  text-align:center;
+  padding:4rem 1rem 2rem;
+  border-bottom-left-radius:32px;
+  border-bottom-right-radius:32px;
+  overflow:hidden;
+}
+@keyframes gradientBG {
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
+header h1 {font-size:3rem; letter-spacing:2px; font-weight:700;}
+header p {font-size:1.25rem; color:#e0e0e0; margin-top:0.5rem;}
+
+/* NAVIGATION */
+nav {
+  position: sticky;
+  top:0;
+  background:#fff;
+  display:flex;
+  justify-content:center;
+  padding:0.8rem 0;
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);
+  z-index:10;
+}
+nav a {
+  margin:0 1rem;
+  text-decoration:none;
+  font-weight:600;
+  color:#232526;
+  padding:0.5rem 0.8rem;
+  border-radius:6px;
+  transition:0.3s;
+}
+nav a:hover,
+nav a.active {
+  background: linear-gradient(90deg, #232526 0%, #0abcf3 100%);
+  color:#fff;
+}
+
+/* GRID DE TARJETAS */
+main {
+  max-width:900px;
+  margin:2rem auto;
+  padding:1rem;
+}
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px,1fr));
+  gap:1.5rem;
+}
+.card {
+  background:rgba(255,255,255,0.95);
+  border-radius:18px;
+  padding:1rem;
+  box-shadow:0 4px 24px rgba(35,37,38,0.08);
+  text-align:center;
+  transition:transform 0.3s, box-shadow 0.3s;
+}
+.card:hover {transform:translateY(-5px) scale(1.03); box-shadow:0 10px 30px rgba(35,37,38,0.15);}
+.card img {width:100%; border-radius:12px; margin-bottom:1rem;}
+.card h3 {font-size:1.2rem; margin-bottom:0.5rem;}
+.card p {font-size:0.95rem; color:#555;}
+
+/* BOTÓN */
+.button-link {
+  display:inline-block;
+  background: linear-gradient(90deg, #232526 0%, #0abcf3 100%);
+  color:#fff;
+  padding:0.7rem 1.5rem;
+  border-radius:8px;
+  font-weight:600;
+  text-decoration:none;
+  box-shadow:0 2px 8px rgba(35,37,38,0.1);
+  transition:0.3s;
+}
+.button-link:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow:0 6px 18px rgba(35,37,38,0.18);
+  background: linear-gradient(90deg, #0abcf3 0%, #232526 100%);
+}
+
+/* FOOTER */
+footer {
+  background:#232526;
+  color:#e0e0e0;
+  text-align:center;
+  padding:1.5rem 1rem;
+  border-top-left-radius:24px;
+  border-top-right-radius:24px;
+  margin-top:3rem;
+  font-size:0.95rem;
+}
+footer a {color:#0abcf3; text-decoration:underline;}
+footer a:hover {color:#fff;}
+</style>
 </head>
 <body>
 
 <header>
   <h1>Diseños</h1>
-  <p>Logotipos y piezas visuales por Nicolás Trinidad</p>
+  <p>Logotipos y piezas visuales creadas por Nicolás Trinidad</p>
 </header>
 
+<nav>
+  <a href="../index.html">Inicio</a>
+  <a href="../disenos/index.html" class="active">Diseños</a>
+  <a href="../videojuegos/index.html">Videojuegos</a>
+  <a href="../libros/index.html">Libros</a>
+  <a href="../index.html#contacto">Contacto</a>
+</nav>
+
 <main>
-  <div class="galeria">
-    <img src="logo1.png" alt="Logotipo 1">
-    <img src="logo2.png" alt="Logotipo 2">
-    <!-- Puede añadir más imágenes aquí -->
+  <div class="grid">
+    <div class="card">
+      <img src="logo1.png" alt="Logotipo 1 de Kronos">
+      <h3>Logotipo 1</h3>
+      <p>Diseño vectorial limpio y moderno.</p>
+    </div>
+    <div class="card">
+      <img src="logo2.png" alt="Logotipo 2 de Kronos">
+      <h3>Logotipo 2</h3>
+      <p>Exploración de formas geométricas y tipografía creativa.</p>
+    </div>
   </div>
 
-  <a class="volver" href="../index.html">← Volver al inicio</a>
+  <div style="text-align:center; margin-top:2rem;">
+    <a class="button-link" href="../index.html">← Volver al inicio</a>
+  </div>
 </main>
 
 <footer>
-  © 2025 Nicolás Trinidad – Registrado en <a href="https://www.safecreative.org/" style="color: white;" target="_blank">Safe Creative</a>.
+  © 2025 Nicolás Trinidad – Registrado en <a href="https://www.safecreative.org/" target="_blank">Safe Creative</a>.<br>
+  Sígueme en <a href="https://github.com/tuusuario" target="_blank">GitHub</a> y <a href="https://tu.carrd.co" target="_blank">Carrd</a>.
 </footer>
-
 </body>
 </html>
