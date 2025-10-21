@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kronos - Nicolás Trinidad</title>
+  <title>Kronos by NT</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
 
   <!-- SEO y Open Graph -->
   <meta name="description" content="Portafolio de Nicolás Trinidad: CV, diseños, videojuegos y libros">
-  <meta property="og:title" content="Kronos - Nicolás Trinidad">
+  <meta property="og:title" content="Kronos by NT">
   <meta property="og:description" content="Portafolio personal de Nicolás Trinidad: CV, diseños, videojuegos y libros">
   <meta property="og:image" content="ruta/a/imagen-previa.png">
-  <meta property="og:url" content="https://tusitio.com">
+  <meta property="og:url" content="https://kronos1914.github.io/Kronos-Universal/">
   <meta name="twitter:card" content="summary_large_image">
 
   <style>
@@ -66,12 +66,13 @@
       background:#fff;
       display:flex;
       justify-content:center;
+      flex-wrap: wrap;
       padding:0.8rem 0;
       box-shadow:0 2px 8px rgba(0,0,0,0.05);
       z-index:10;
     }
     nav a {
-      margin:0 1rem;
+      margin:0.3rem 1rem;
       text-decoration:none;
       font-weight:600;
       color:#232526;
@@ -87,7 +88,7 @@
 
     /* SECCIONES */
     section {
-      max-width: 900px;
+      max-width: 90%;
       margin: 2rem auto;
       padding: 2rem 1.5rem;
       background: rgba(255,255,255,0.95);
@@ -135,7 +136,7 @@
     /* GRID Y TARJETAS */
     .grid {
       display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
       gap:1.5rem;
       margin-top:1rem;
     }
@@ -156,7 +157,7 @@
     .card h3 {margin-bottom:0.5rem; font-size:1.2rem; color:#232526;}
     .card p {font-size:0.95rem; color:#555;}
 
-    /* CONTACT FORM */
+    /* FORMULARIO DE CONTACTO */
     form {display:flex; flex-direction:column; gap:0.8rem;}
     input, textarea {
       padding:0.8rem;
@@ -180,6 +181,27 @@
     }
     footer a {color:#0abcf3; text-decoration:underline; transition:0.3s;}
     footer a:hover {color:#fff;}
+
+    /* MEDIA QUERIES PARA MÓVILES */
+    @media (max-width: 768px) {
+      header h1 { font-size:2.5rem; }
+      header p { font-size:1.1rem; }
+      nav { flex-direction: column; padding: 0.5rem 0; }
+      nav a { margin: 0.3rem 0; }
+      section h2 { font-size:1.7rem; }
+      section p { font-size:1rem; }
+      .button-link { padding:0.6rem 1.2rem; }
+    }
+
+    @media (max-width: 480px) {
+      header h1 { font-size:2rem; }
+      header p { font-size:1rem; }
+      section h2 { font-size:1.5rem; }
+      section p { font-size:0.95rem; }
+      .button-link { width:100%; text-align:center; padding:0.7rem; }
+      .grid { grid-template-columns: 1fr; gap:1rem; }
+      form button { width:100%; }
+    }
   </style>
 </head>
 <body>
@@ -188,8 +210,6 @@
   <h1>Kronos</h1>
   <p>Portafolio personal de Nicolás Trinidad</p>
 </header>
-
-
 
 <nav>
   <a href="#sobre-mi">Sobre mí</a>
@@ -203,16 +223,15 @@
 <section id="sobre-mi">
   <h2>Sobre mí</h2>
   <p>Hola, soy Nicolás Trinidad, diseñador y desarrollador. Me especializo en la creación de videojuegos, diseños gráficos y literatura. Me apasiona aprender y compartir mi trabajo en línea.</p>
-  <p>Descubre mas sobre mí en <a href="https://github.com/Kronos1914" target="_blank">GitHub</a> y <a href="https://kronos1914.carrd.co/" target="_blank">Carrd</a>.</p>
+  <p>Descubre más sobre mí en <a href="https://github.com/Kronos1914" target="_blank">GitHub</a> y <a href="https://kronos1914.carrd.co/" target="_blank">Carrd</a>.</p>
 </section>
 
 <section id="cv">
   <h2>Currículum</h2>
-  <p>Descarga mi CV en PDF.</p>
+  <p>Descarga mi CV en PDF o miralo online en <a href="https://kronos1914.carrd.co/" target="_blank">Carrd</a>.</p>
   <a class="button-link" href="documentos/cv-nicolas-trinidad.pdf" download>Descargar CV</a>
 </section>
 
-<!-- SECCIÓN DISEÑOS -->
 <section id="disenos">
   <h2>Diseños</h2>
   <p>Logotipos y piezas visuales creadas por mí.</p>
@@ -233,7 +252,6 @@
   </div>
 </section>
 
-<!-- SECCIÓN VIDEOJUEGOS -->
 <section id="juegos">
   <h2>Videojuegos</h2>
   <p>Juegos creados en HTML y otros formatos.</p>
@@ -254,7 +272,6 @@
   </div>
 </section>
 
-<!-- SECCIÓN LIBROS -->
 <section id="libros">
   <h2>Libros</h2>
   <p>Poesía y cuentos infantiles.</p>
@@ -275,11 +292,10 @@
   </div>
 </section>
 
-
 <section id="contacto">
   <h2>Contacto</h2>
   <p>¿Quieres colaborar o hablar de un proyecto? Escríbeme:</p>
-  <form action="mailto:tuemail@ejemplo.com" method="post" enctype="text/plain">
+  <form action="mailto:cocotero1914@gmail.com" method="post" enctype="text/plain">
     <input type="text" name="nombre" placeholder="Tu nombre" required>
     <input type="email" name="email" placeholder="Tu email" required>
     <textarea name="mensaje" placeholder="Escribe tu mensaje..." required></textarea>
